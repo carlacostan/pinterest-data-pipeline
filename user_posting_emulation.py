@@ -7,6 +7,11 @@ import json
 import sqlalchemy
 from sqlalchemy import text
 import yaml
+from datetime import datetime
+
+# Load database credentials and API Invoke URL from db_creds.yml
+with open('db_creds.yml', 'r') as file:
+    db_config = yaml.safe_load(file)
 
 random.seed(100)
 
@@ -23,12 +28,40 @@ class AWSDBConnector:
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE}?charset=utf8mb4")
         return engine
 
+def datetime_converter(o):
+    if isinstance(o, datetime):
+        return o.isoformat()
+    
 # Load database credentials from db_creds.yaml
 with open('db_creds.yml', 'r') as file:
     db_config = yaml.safe_load(file)
 
 new_connector = AWSDBConnector(db_config)
+API_ENDPOINT = db_config['API_INVOKE_URL']
 
+def send_to_kafka(topic, data):
+    invoke_url = f"{API_ENDPOINT}/topics/{topic}"
+    
+    # Convert datetime objects in data to strings
+    payload = json.dumps({
+        "records": [
+            {
+                "value": data
+            }
+        ]
+    }, default=datetime_converter)
+
+    headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
+    try:
+        response = requests.request("POST", invoke_url, headers=headers, data=payload)
+        response.raise_for_status()
+        print(f"Successfully sent data to {topic}")
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to send data to {topic}: {str(e)}")
+        if response:
+            print(f"Response Status Code: {response.status_code}")
+            print(f"Response Text: {response.text}")
+        
 def run_infinite_post_data_loop():
     while True:
         sleep(random.randrange(0, 2))
@@ -54,9 +87,10 @@ def run_infinite_post_data_loop():
             for row in user_selected_row:
                 user_result = dict(row._mapping)
             
-            print(pin_result)
-            print(geo_result)
-            print(user_result)
+            #Send to Kafka
+            send_to_kafka("12d03c8b5ccd.pin", pin_result)
+            send_to_kafka("12d03c8b5ccd.geo", geo_result)
+            send_to_kafka("12d03c8b5ccd.user", user_result)
 
 if __name__ == "__main__":
     run_infinite_post_data_loop()

@@ -73,4 +73,6 @@ Temporary Items
 
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
 db_creds.yml
-
+12d03c8b5ccd-key-pair.pem
+.env
+**/__pycache__
