@@ -1,8 +1,0 @@
-conda create --name myenv
-conda activate myenv
-conda install pip
-pip install boto3
-conda install pyyaml
-conda install sqlalchemy
-
-chmod 400 12d03c8b5ccd-key-pair.pem
