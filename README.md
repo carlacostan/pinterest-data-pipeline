@@ -271,8 +271,6 @@ This project provided hands-on experience with:
 
       * Navigate to API gateway in AWS and click **'Create Resource'**.
 
-    ![alt text](Images/EC2_instance.png)
-
     Step 2: Create a ANY Method.
 
       * Click on the ANY resource, then on the Edit integration button. Follow the format below, the Endpoint URL should be `http://KafkaClientEC2InstancePublicDNS:8082/{proxy}`:
