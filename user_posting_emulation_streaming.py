@@ -5,11 +5,17 @@ import json
 from sqlalchemy import text
 from db_connector import AWSDBConnector  
 
+# Load API Invoke URL from db_creds.yml
+with open('db_creds.yml', 'r') as file:
+    db_config = yaml.safe_load(file)
+    
 # Initialize the database connector
 new_connector = AWSDBConnector()
 
+# Load the base API Invoke URL from the db_creds.yml
+base_invoke_url = db_config['API_INVOKE_URL']
+
 # API Invoke URLs
-base_invoke_url = "https://8dpb920pic.execute-api.us-east-1.amazonaws.com/streams"
 pin_invoke_url = f"{base_invoke_url}/streaming-12d03c8b5ccd-pin/record"
 geo_invoke_url = f"{base_invoke_url}/streaming-12d03c8b5ccd-geo/record"
 user_invoke_url = f"{base_invoke_url}/streaming-12d03c8b5ccd-user/record"
